@@ -1,3 +1,4 @@
+import math
 import requests
 import json
 from datetime import datetime
@@ -36,9 +37,9 @@ async def start_loop(ctx):
     await ctx.send('Beginning tracking...')
     global started
     started = True
-    bot.loop.create_task(send_message_every_5_seconds(ctx.channel))
+    bot.loop.create_task(begin_tracking(ctx.channel))
 
-async def send_message_every_5_seconds(channel):
+async def begin_tracking(channel):
     global started 
     last_match_id = None
     while started:
@@ -50,7 +51,7 @@ async def send_message_every_5_seconds(channel):
 
         print("Match found:", match_id )
 
-        if match_id != last_match_id and int(rr_change) < 0:
+        if match_id != last_match_id:
             url_match = f"https://api.henrikdev.xyz/valorant/v4/match/eu/{match_id}"
 
             res_match = requests.get(url_match, headers=headers)
@@ -61,6 +62,14 @@ async def send_message_every_5_seconds(channel):
             dt = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
             hr = dt.strftime("%A, %B %d, %Y %I:%M:%S %p")
 
+            for team in response_match["data"]["teams"]:
+                if team["team_id"] == "Red":
+                    red_score = team["rounds"]["won"]
+                else:
+                    blue_score = team["rounds"]["won"]
+
+            round_count = red_score + blue_score
+
             red_team = []
             blue_team = []
             for player in response_match['data']['players']:
@@ -69,20 +78,26 @@ async def send_message_every_5_seconds(channel):
                 else:
                     blue_team.append(player)
 
-            print(f"Match ID: {match_id}")
-            print(f"Started at (UTC): {hr}")
-            print(f"Outcome: Loss")
-            print(f"Map: {response_match['data']['metadata']['map']['name']}")
-            print(f"RR Change: {rr_change}")
-            print("\n")
-            print(f'{"Red Team":16} {"K":2} - {"D":2} - {"A":2} | Rank\n')
+            outcome = "Defeat" if int(rr_change) < 0 else "Victory"
 
+            red_team.sort(key = lambda x: x['stats']['score'], reverse=True)
+            blue_team.sort(key = lambda x: x['stats']['score'], reverse=True)
+
+            print(f"Match ID: {match_id}")
+            print(f"Started at (UTC): {hr} (UTC)")
+            print(f"Outcome: {outcome}")
+            print(f"Red {red_score} : {blue_score} Blue")
+            print(f"Map: {response_match['data']['metadata']['map']['name']}")
+            print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
+            print("\n")
+            print(f'{"Red Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
+            
             for player in red_team:
-                print(f'{player["name"]:16} {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
-            print(f'\n{"Blue Team":16} {"K":2} - {"D":2} - {"A":2} | Rank\n')
+                print(f'{player["name"]:16} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+            print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
 
             for player in blue_team:
-                print(f'{player["name"]:16} {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                print(f'{player["name"]:16} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
             print()
 
             # Collect all the details into a single string
@@ -90,24 +105,27 @@ async def send_message_every_5_seconds(channel):
 
             # Match details
             output.append(f"Match ID: {match_id}")
-            output.append(f"Started at: {hr}")
-            output.append(f"Outcome: Loss")
+            output.append(f"Started at: {hr} (UTC)")
+            output.append(f"Outcome: {outcome}")
             output.append(f"Map: {response_match['data']['metadata']['map']['name']}")
-            output.append(f"RR Change: {rr_change}")
-            output.append("\n")
-
+            output.append(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
+            output.append("")
+#
+            output.append(f"{f'Red {red_score} - {blue_score} Blue':^53}")
+            output.append("")
+            
             # Red Team stats
-            output.append(f'{"Red Team":16} {"K":2} - {"D":2} - {"A":2} | Rank\n')
+            output.append(f'| {"Red Team":16} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":11} |\n')
             for player in red_team:
-                output.append(f'{player["name"]:16} {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                output.append(f'| {player["name"]:16} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
 
-            output.append("\n")
+            output.append("")
             # Blue Team stats
-            output.append(f'{"Blue Team":16} {"K":2} - {"D":2} - {"A":2} | Rank\n')
+            output.append(f'\n| {"Blue Team":16} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":11} |\n')
             for player in blue_team:
-                output.append(f'{player["name"]:16} {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                output.append(f'| {player["name"]:16} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
 
-
+            
             # Print the entire compiled string
             msg = "```\n" + "\n".join(output) + "\n```"
             await channel.send(msg)
