@@ -16,11 +16,12 @@ headers = {
 }
 
 # Your bot token
-TOKEN = ''
+TOKEN = ""
 
 intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
 intents.message_content = True                                                                                                                                                           
+started = False
 # Define the bot prefix
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -33,11 +34,14 @@ async def on_ready():
 @bot.command(name='start')
 async def start_loop(ctx):
     await ctx.send('Beginning tracking...')
+    global started
+    started = True
     bot.loop.create_task(send_message_every_5_seconds(ctx.channel))
 
 async def send_message_every_5_seconds(channel):
+    global started 
     last_match_id = None
-    while True:
+    while started:
         res = requests.get(url, headers=headers)
 
         response = json.loads(res.text)
@@ -66,7 +70,7 @@ async def send_message_every_5_seconds(channel):
                     blue_team.append(player)
 
             print(f"Match ID: {match_id}")
-            print(f"Started at: {hr}")
+            print(f"Started at (UTC): {hr}")
             print(f"Outcome: Loss")
             print(f"Map: {response_match['data']['metadata']['map']['name']}")
             print(f"RR Change: {rr_change}")
@@ -108,7 +112,7 @@ async def send_message_every_5_seconds(channel):
             msg = "```\n" + "\n".join(output) + "\n```"
             await channel.send(msg)
         
-            last_match_id = match_id
+        last_match_id = match_id
 
         await asyncio.sleep(30)
 
@@ -117,6 +121,8 @@ async def send_message_every_5_seconds(channel):
 async def stop_loop(ctx):
     await ctx.send('Stopping tracking...')
     # Logic to stop the loop can be implemented here
+    global started
+    started = False
 
 # Run the bot with the specified token
 bot.run(TOKEN)
