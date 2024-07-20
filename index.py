@@ -2,14 +2,18 @@ import math
 import requests
 import json
 from datetime import datetime
-
+import config
 import discord
 import asyncio
 from discord.ext import commands
 
-API_KEY = ""
+API_KEY = config.API_KEY
 
-url = "https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/[name]/[tag]"
+NAME = config.NAME
+
+TAG = config.TAG
+
+url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
 
 headers = {
     'Content-Type': 'application/json',
@@ -17,7 +21,7 @@ headers = {
 }
 
 # Your bot token
-TOKEN = ""
+TOKEN = config.TOKEN
 
 intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
@@ -90,14 +94,14 @@ async def begin_tracking(channel):
             print(f"Map: {response_match['data']['metadata']['map']['name']}")
             print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
             print("\n")
-            print(f'{"Red Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
+            print(f'{"Red Team":16} | {"Agent":^9} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
             
             for player in red_team:
-                print(f'{player["name"]:16} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
             print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
 
             for player in blue_team:
-                print(f'{player["name"]:16} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
             print()
 
             # Collect all the details into a single string
@@ -115,15 +119,15 @@ async def begin_tracking(channel):
             output.append("")
             
             # Red Team stats
-            output.append(f'| {"Red Team":16} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":11} |\n')
+            output.append(f'| {"Red Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
             for player in red_team:
-                output.append(f'| {player["name"]:16} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+                output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
 
             output.append("")
             # Blue Team stats
-            output.append(f'\n| {"Blue Team":16} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":11} |\n')
+            output.append(f'\n| {"Blue Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
             for player in blue_team:
-                output.append(f'| {player["name"]:16} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+                output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
 
             
             # Print the entire compiled string
