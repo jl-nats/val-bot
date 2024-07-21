@@ -48,10 +48,28 @@ async def start_loop(ctx):
     bot.loop.create_task(begin_tracking(ctx.channel))
 
 @bot.command(name='embed')
-async def start_loop(ctx):
+async def embed(ctx):
     global embed
     await ctx.send('Disabling embed' if embed else 'Enabling embed')
     embed = not embed
+
+@bot.command(name='setUser')
+async def set_user(ctx, name, tag):
+    await ctx.send(f'Changing tracking to {name}#{tag}...')
+    
+    global NAME,TAG, url
+    
+    res = requests.get(f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{name}/{tag}", headers=headers)
+    response = json.loads(res.text)
+    
+    if not "errors" in response:
+        NAME = name
+        TAG = tag
+        url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
+        
+        await ctx.send(f'Successfully tracking {name}#{tag}')
+    else:
+        await ctx.send(f'Failed to change tracking to {name}#{tag}')
 
 async def begin_tracking(channel):
     global started 
