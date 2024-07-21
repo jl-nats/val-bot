@@ -115,8 +115,6 @@ async def begin_tracking(channel):
                                     "blue" : { "name" : "Blue", "players" : blue_team, "score" : blue_score }
                         }
                     }
-                
-                print(data)
     
                 embed_msg = embedParser.generateEmbed(data)
                 if not embed_msg == None:
