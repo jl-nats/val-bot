@@ -55,7 +55,7 @@ def generateEmbed(data):
     # embed.add_field(name="LEADERBOARD",value="AGENT | ACS | K-D-A | RANK",inline=False)
     
     for team in data["teams"]:
-        embed.add_field(name=f"――――――――――――――\n### {data['teams'][team]['name']} Team ###",value=b(" "), inline=False)
+        embed.add_field(name=f"――――――――――――――――――――――――――――\n### {data['teams'][team]['name']} Team ###",value=b(" "), inline=False)
         for player in data["teams"][team]["players"]:
             print(player["name"])
             
