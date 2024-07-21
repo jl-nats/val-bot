@@ -32,9 +32,7 @@ maps = { 'Sunset':'https://static.wikia.nocookie.net/valorant/images/5/5c/Loadin
         'Haven':'https://static.wikia.nocookie.net/valorant/images/7/70/Loading_Screen_Haven.png',
         'Split':'https://static.wikia.nocookie.net/valorant/images/d/d6/Loading_Screen_Split.png',
         'Ascent':'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png',
-        'Abyss':'https://www.vpesports.com/wp-content/uploads/2024/06/Screenshot_4-19.png'}
-
-mapDefault = ""
+        }
 
 # print(ranks)
 
@@ -47,12 +45,16 @@ def generateEmbed(data):
     
     outcome_str = ("WIN" if data["match"]["outcome"] else "LOSS")
     
-    mapImage = maps.get(data['match']['map'], mapDefault)
+    mapImage = maps.get(data['match']['map'], "")
     # print(f'Map is invalid? {mapImage == mapDefault}' )
     
-    embed.set_image(url=mapImage)
     embed.add_field(name=ita(f"Outcome {outcome_str}"),value=b(f"RRΔ {'+' if data['match']['rr'] > 0 else ''}{data['match']['rr']}"))
     # embed.add_field(name="LEADERBOARD",value="AGENT | ACS | K-D-A | RANK",inline=False)
+    
+    if not mapImage == "":
+        embed.set_image(url=mapImage)
+    else:
+        embed.add_field(name=f"Map", value=ita(data['match']['map']))
     
     for team in data["teams"]:
         embed.add_field(name=f"――――――――――――――――――――――――――――\n### {data['teams'][team]['name']} Team ###",value=b(" "), inline=False)
