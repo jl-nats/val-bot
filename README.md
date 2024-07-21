@@ -32,3 +32,5 @@ python3 index.py
 ```
 
 In the server, run !start and then match history will automatically be posted in that channel.
+
+Use !embed to switch between simple and fancy layout.
