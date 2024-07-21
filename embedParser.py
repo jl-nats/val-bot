@@ -61,7 +61,7 @@ def generateEmbed(data):
             
             embed.add_field(name=f'{b(player["name"])} <:{player["tier"]["name"].replace(" ", "")}:{ranks[player["tier"]["name"].replace(" ", "")]}>',
                             value=(f'''`{player["agent"]["name"]}` {math.floor(player["stats"]["score"]/data['match']['rounds']):^16}
-                                   `{player["stats"]["kills"]}{player["stats"]["deaths"]}-{player["stats"]["assists"]}`'''))
+                                   `{player["stats"]["kills"]}-{player["stats"]["deaths"]}-{player["stats"]["assists"]}`'''))
         embed.add_field(name=' ', value=' ')
     
     embed.set_footer(text=f"{datetime.strptime(data['head']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y %I:%M%p')} | {data['head']['id']}")
