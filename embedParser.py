@@ -1,12 +1,6 @@
-import os
 import math
-import requests
-import json
 from datetime import datetime
-import config
 import discord
-import asyncio
-from discord.ext import commands
 
 WIN_COL = 4289797
 LOSS_COL = 13632027
