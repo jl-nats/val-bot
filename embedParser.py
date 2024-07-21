@@ -36,7 +36,7 @@ maps = { 'Sunset':'https://static.wikia.nocookie.net/valorant/images/5/5c/Loadin
 
 mapDefault = ""
 
-print(ranks)
+# print(ranks)
 
 def generateEmbed(data):
     embed = discord.Embed(
@@ -48,7 +48,7 @@ def generateEmbed(data):
     outcome_str = ("WIN" if data["match"]["outcome"] else "LOSS")
     
     mapImage = maps.get(data['match']['map'], mapDefault)
-    print(f'Map is invalid? {mapImage == mapDefault}' )
+    # print(f'Map is invalid? {mapImage == mapDefault}' )
     
     embed.set_image(url=mapImage)
     embed.add_field(name=ita(f"Outcome {outcome_str}"),value=b(f"RRΔ {'+' if data['match']['rr'] > 0 else ''}{data['match']['rr']}"))
@@ -57,12 +57,12 @@ def generateEmbed(data):
     for team in data["teams"]:
         embed.add_field(name=f"――――――――――――――――――――――――――――\n### {data['teams'][team]['name']} Team ###",value=b(" "), inline=False)
         for player in data["teams"][team]["players"]:
-            print(player["name"])
+            # print(player["name"])
             
             rankIcon = ranks.get(player["tier"]["name"].replace(" ", ""), '')
             rankIcon = f'<:{rankIcon}:{ranks[player["tier"]["name"].replace(" ", "")]}>' if not rankIcon == '' else ''
             
-            print(f'Emblem is invalid? {rankIcon == ""}' )
+            # print(f'Emblem is invalid? {rankIcon == ""}' )
             
             embed.add_field(name=f'{b(player["name"])} {rankIcon}',
                             value=(f'''`{player["agent"]["name"]}` 
