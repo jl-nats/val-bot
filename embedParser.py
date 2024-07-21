@@ -31,7 +31,8 @@ maps = { 'Sunset':'https://static.wikia.nocookie.net/valorant/images/5/5c/Loadin
         'Bind':'https://static.wikia.nocookie.net/valorant/images/2/23/Loading_Screen_Bind.png',
         'Haven':'https://static.wikia.nocookie.net/valorant/images/7/70/Loading_Screen_Haven.png',
         'Split':'https://static.wikia.nocookie.net/valorant/images/d/d6/Loading_Screen_Split.png',
-        'Ascent':'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png'}
+        'Ascent':'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png',
+        'Abyss':'https://www.vpesports.com/wp-content/uploads/2024/06/Screenshot_4-19.png'}
 
 mapDefault = ""
 
