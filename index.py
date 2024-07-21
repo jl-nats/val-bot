@@ -7,6 +7,8 @@ import discord
 import asyncio
 from discord.ext import commands
 
+import embedParser
+
 API_KEY = config.API_KEY
 
 NAME = config.NAME
@@ -27,6 +29,7 @@ intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
 intents.message_content = True                                                                                                                                                           
 started = False
+embed = True
 # Define the bot prefix
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -34,6 +37,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'Bot is ready. Logged in as {bot.user}')
+    await bot.change_presence(activity=discord. Activity(type=discord.ActivityType.listening, name="Ammar's comms 🔇"))
 
 # Command to start the loop
 @bot.command(name='start')
@@ -42,6 +46,12 @@ async def start_loop(ctx):
     global started
     started = True
     bot.loop.create_task(begin_tracking(ctx.channel))
+
+@bot.command(name='embed')
+async def start_loop(ctx):
+    global embed
+    await ctx.send('Disabling embed' if embed else 'Enabling embed')
+    embed = not embed
 
 async def begin_tracking(channel):
     global started 
@@ -81,58 +91,87 @@ async def begin_tracking(channel):
                     red_team.append(player)
                 else:
                     blue_team.append(player)
-
+            
             outcome = "Defeat" if int(rr_change) < 0 else "Victory"
 
             red_team.sort(key = lambda x: x['stats']['score'], reverse=True)
             blue_team.sort(key = lambda x: x['stats']['score'], reverse=True)
 
-            print(f"Match ID: {match_id}")
-            print(f"Started at (UTC): {hr} (UTC)")
-            print(f"Outcome: {outcome}")
-            print(f"Red {red_score} : {blue_score} Blue")
-            print(f"Map: {response_match['data']['metadata']['map']['name']}")
-            print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
-            print("\n")
-            print(f'{"Red Team":16} | {"Agent":^9} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
-            
-            for player in red_team:
-                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
-            print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
 
-            for player in blue_team:
-                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
-            print()
+            global embed
+            if embed:
+                outcome = 0 if int(rr_change) < 0 else 1
+                
+                data = { "head": {  "id" : match_id, 
+                                    "timestamp" : response_match["data"]["metadata"]["started_at"],
+                                    "start": hr },
+                        
+                        "match": { "outcome" : outcome,
+                                    "rounds" : round_count, 
+                                    "map" : response_match['data']['metadata']['map']['name'],
+                                    "rr": rr_change},
+                        
+                        "teams": { "red" : { "name" : "Red", "players" : red_team, "score" : red_score },
+                                    "blue" : { "name" : "Blue", "players" : blue_team, "score" : blue_score }
+                        }
+                    }
+                
+                print(data)
+    
+                embed_msg = embedParser.generateEmbed(data)
+                if not embed_msg == None:
+                    await channel.send(embed=embed_msg)
+                else:
+                    await channel.send('Failed to generate embed')
+                    embed = False
 
-            # Collect all the details into a single string
-            output = []
+            else:
+                print(f"Match ID: {match_id}")
+                print(f"Started at (UTC): {hr} (UTC)")
+                print(f"Outcome: {outcome}")
+                print(f"Red {red_score} : {blue_score} Blue")
+                print(f"Map: {response_match['data']['metadata']['map']['name']}")
+                print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
+                print("\n")
+                print(f'{"Red Team":16} | {"Agent":^9} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
+                
+                for player in red_team:
+                    print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
 
-            # Match details
-            output.append(f"Match ID: {match_id}")
-            output.append(f"Started at: {hr} (UTC)")
-            output.append(f"Outcome: {outcome}")
-            output.append(f"Map: {response_match['data']['metadata']['map']['name']}")
-            output.append(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
-            output.append("")
-#
-            output.append(f"{f'Red {red_score} - {blue_score} Blue':^53}")
-            output.append("")
-            
-            # Red Team stats
-            output.append(f'| {"Red Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
-            for player in red_team:
-                output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+                for player in blue_team:
+                    print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+                print()
 
-            output.append("")
-            # Blue Team stats
-            output.append(f'\n| {"Blue Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
-            for player in blue_team:
-                output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+                # Collect all the details into a single string
+                output = []
 
-            
-            # Print the entire compiled string
-            msg = "```\n" + "\n".join(output) + "\n```"
-            await channel.send(msg)
+                # Match details
+                output.append(f"Match ID: {match_id}")
+                output.append(f"Started at: {hr} (UTC)")
+                output.append(f"Outcome: {outcome}")
+                output.append(f"Map: {response_match['data']['metadata']['map']['name']}")
+                output.append(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
+                output.append("")
+    #
+                output.append(f"{f'Red {red_score} - {blue_score} Blue':^53}")
+                output.append("")
+                
+                # Red Team stats
+                output.append(f'| {"Red Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
+                for player in red_team:
+                    output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+
+                output.append("")
+                # Blue Team stats
+                output.append(f'\n| {"Blue Team":^16} | {"Agent":^9} |  ACS  | {"K":2} - {"D":2} - {"A":2} | {"Rank":^11} |\n')
+                for player in blue_team:
+                    output.append(f'| {player["name"]:16} | {player["agent"]["name"]:9} | {round(player["stats"]["score"]/round_count):^5} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]:11} |')
+
+                
+                # Print the entire compiled string
+                msg = "```\n" + "\n".join(output) + "\n```"
+                await channel.send(msg)
         
         last_match_id = match_id
 
@@ -145,6 +184,71 @@ async def stop_loop(ctx):
     # Logic to stop the loop can be implemented here
     global started
     started = False
+
+# @bot.command(name='last')
+# async def test(ctx):
+#     await ctx.send('Last game...')
+    
+#     res = requests.get(url, headers=headers)
+
+#     response = json.loads(res.text)
+#     rr_change = response["data"][0]["mmr_change_to_last_game"]
+#     match_id = response["data"][0]["match_id"]
+    
+#     print("Match found:", match_id )
+    
+#     url_match = f"https://api.henrikdev.xyz/valorant/v4/match/eu/{match_id}"
+
+#     res_match = requests.get(url_match, headers=headers)
+
+#     response_match = json.loads(res_match.text) 
+    
+#     timestamp = response_match["data"]["metadata"]["started_at"]
+#     dt = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
+#     hr = dt.strftime("%A, %B %d, %Y %I:%M:%S %p")
+    
+#     for team in response_match["data"]["teams"]:
+#         if team["team_id"] == "Red":
+#             red_score = team["rounds"]["won"]
+#         else:
+#             blue_score = team["rounds"]["won"]
+
+#     round_count = red_score + blue_score
+    
+#     red_team = []
+#     blue_team = []
+#     for player in response_match['data']['players']:
+#         if player['team_id'] == 'Red':
+#             red_team.append(player)
+#         else:
+#             blue_team.append(player)
+
+#     outcome = 0 if int(rr_change) < 0 else 1
+
+#     red_team.sort(key = lambda x: x['stats']['score'], reverse=True)
+#     blue_team.sort(key = lambda x: x['stats']['score'], reverse=True)
+    
+#     data = { "head": {  "id" : match_id, 
+#                         "timestamp" : response_match["data"]["metadata"]["started_at"],
+#                         "start": hr },
+            
+#              "match": { "outcome" : outcome,
+#                         "rounds" : round_count, 
+#                         "map" : response_match['data']['metadata']['map']['name'],
+#                         "rr": rr_change},
+             
+#              "teams": { "red" : { "name" : "Red", "players" : red_team, "score" : red_score },
+#                         "blue" : { "name" : "Blue", "players" : blue_team, "score" : blue_score }
+#              }
+#     }
+    
+#     print(data)
+    
+#     embed = embedParser.generateEmbed(data)
+#     if not embed == None:
+#         await ctx.channel.send(embed=embed)
+#     else:
+#         await ctx.send('Failed')
 
 # Run the bot with the specified token
 bot.run(TOKEN)
