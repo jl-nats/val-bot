@@ -33,6 +33,8 @@ maps = { 'Sunset':'https://static.wikia.nocookie.net/valorant/images/5/5c/Loadin
         'Split':'https://static.wikia.nocookie.net/valorant/images/d/d6/Loading_Screen_Split.png',
         'Ascent':'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png'}
 
+mapDefault = ""
+
 print(ranks)
 
 def generateEmbed(data):
@@ -44,7 +46,10 @@ def generateEmbed(data):
     
     outcome_str = ("WIN" if data["match"]["outcome"] else "LOSS")
     
-    embed.set_image(url=maps[data['match']['map']])
+    mapImage = maps.get(data['match']['map'], mapDefault)
+    print(f'Map is invalid? {mapImage == mapDefault}' )
+    
+    embed.set_image(url=mapImage)
     embed.add_field(name=ita(f"Outcome {outcome_str}"),value=b(f"RRΔ {'+' if data['match']['rr'] > 0 else ''}{data['match']['rr']}"))
     # embed.add_field(name="LEADERBOARD",value="AGENT | ACS | K-D-A | RANK",inline=False)
     
@@ -53,7 +58,12 @@ def generateEmbed(data):
         for player in data["teams"][team]["players"]:
             print(player["name"])
             
-            embed.add_field(name=f'{b(player["name"])} <:{player["tier"]["name"].replace(" ", "")}:{ranks[player["tier"]["name"].replace(" ", "")]}>',
+            rankIcon = ranks.get(player["tier"]["name"].replace(" ", ""), '')
+            rankIcon = f'<:{rankIcon}:{ranks[player["tier"]["name"].replace(" ", "")]}>' if not rankIcon == '' else ''
+            
+            print(f'Emblem is invalid? {rankIcon == ""}' )
+            
+            embed.add_field(name=f'{b(player["name"])} {rankIcon}',
                             value=(f'''`{player["agent"]["name"]}` 
                                    `{player["stats"]["kills"]}-{player["stats"]["deaths"]}-{player["stats"]["assists"]}` {math.floor(player["stats"]["score"]/data['match']['rounds']):^16}'''))
         embed.add_field(name=' ', value=' ')
