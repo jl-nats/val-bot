@@ -97,6 +97,22 @@ async def begin_tracking(channel):
             red_team.sort(key = lambda x: x['stats']['score'], reverse=True)
             blue_team.sort(key = lambda x: x['stats']['score'], reverse=True)
 
+            print(f"Match ID: {match_id}")
+            print(f"Started at (UTC): {hr} (UTC)")
+            print(f"Outcome: {outcome}")
+            print(f"Red {red_score} : {blue_score} Blue")
+            print(f"Map: {response_match['data']['metadata']['map']['name']}")
+            print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
+            print("\n")
+            print(f'{"Red Team":16} | {"Agent":^9} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
+            
+            for player in red_team:
+                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+            print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
+
+            for player in blue_team:
+                print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
+            print()
 
             global embed
             if embed:
@@ -124,23 +140,6 @@ async def begin_tracking(channel):
                     embed = False
 
             else:
-                print(f"Match ID: {match_id}")
-                print(f"Started at (UTC): {hr} (UTC)")
-                print(f"Outcome: {outcome}")
-                print(f"Red {red_score} : {blue_score} Blue")
-                print(f"Map: {response_match['data']['metadata']['map']['name']}")
-                print(f"RR Change: {'+' if rr_change > 0 else ''}{rr_change}")
-                print("\n")
-                print(f'{"Red Team":16} | {"Agent":^9} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | {"Rank"}  \n')
-                
-                for player in red_team:
-                    print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
-                print(f'\n{"Blue Team":16} | Avg Combat Score | {"K":2} - {"D":2} - {"A":2} | Rank\n')
-
-                for player in blue_team:
-                    print(f'{player["name"]:16} | {player["agent"]["name"]} | {math.floor(player["stats"]["score"]/round_count):^16} | {player["stats"]["kills"]:2} - {player["stats"]["deaths"]:2} - {player["stats"]["assists"]:2} | {player["tier"]["name"]}')
-                print()
-
                 # Collect all the details into a single string
                 output = []
 
