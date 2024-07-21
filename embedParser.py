@@ -20,7 +20,7 @@ ranks = {   'Iron1':1264549482985558088, 'Iron2':1264549499263516692, 'Iron3':12
             'Diamond1':1264549711839232031, 'Diamond2':1264549732379004950, 'Diamond3':1264549748329807872, 
             'Ascendant1':1264549759017029743, 'Ascendant2':1264549768433107045, 'Ascendant3':1264549778084073514, 
             'Immortal1':1264549813173616700, 'Immortal2':1264549825878163517, 'Immortal3':1264549838956003412,  
-            'Radiant':1264549852940075078 }
+            'Radiant':1264549852940075078, 'Unrated':1264599232631799852 }
 
 maps = { 'Sunset':'https://static.wikia.nocookie.net/valorant/images/5/5c/Loading_Screen_Sunset.png',
         'Lotus':'https://static.wikia.nocookie.net/valorant/images/d/d0/Loading_Screen_Lotus.png',
