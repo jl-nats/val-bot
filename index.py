@@ -275,7 +275,7 @@ from discord.ext import commands
 
 app = Flask(__name__)
 
-@app.route('/health')
+@app.route('/')
 def health_check():
     return "OK", 200
 
