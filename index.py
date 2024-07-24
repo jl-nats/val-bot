@@ -9,11 +9,11 @@ from discord.ext import commands
 import os
 import embedParser
 
-API_KEY = os.environ['API_KEY']
+API_KEY = os.environ["API_KEY"]
 
-NAME = os.environ['NAME']
+NAME = os.environ["NAME"]
 
-TAG = os.environ['TAG']
+TAG = os.environ["TAG"]
 
 url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
 
@@ -23,7 +23,7 @@ headers = {
 }
 
 # Your bot token
-TOKEN = os.environ['TOKEN']
+TOKEN = os.environ["TOKEN"]
 
 intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
@@ -266,7 +266,6 @@ async def stop_loop(ctx):
 #         await ctx.send('Failed')
 
 # Run the bot with the specified token
-bot.run(TOKEN)
 
 from flask import Flask
 from threading import Thread
@@ -279,14 +278,15 @@ app = Flask(__name__)
 def health_check():
     return "OK", 200
 
-def run_health_check_server():
-    app.run(host='0.0.0.0', port=8000)
+def run_health_check_server(): 
+    print("Running bogus flask server")
+    app.run(port=8000)
 
-if __name__ == '__main__':
-    # Start the Flask server in a separate thread
-    t = Thread(target=run_health_check_server)
-    t.start()
 
+t = Thread(target=run_health_check_server)
+t.start()
+
+bot.run(TOKEN)
 
 
                         
