@@ -280,7 +280,7 @@ def health_check():
 
 def run_health_check_server(): 
     print("Running bogus flask server")
-    app.run(port=8000)
+    app.run(host='0.0.0.0', port=8000)
 
 
 t = Thread(target=run_health_check_server)
