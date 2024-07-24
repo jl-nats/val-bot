@@ -268,5 +268,25 @@ async def stop_loop(ctx):
 # Run the bot with the specified token
 bot.run(TOKEN)
 
+from flask import Flask
+from threading import Thread
+import discord
+from discord.ext import commands
+
+app = Flask(__name__)
+
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
+def run_health_check_server():
+    app.run(host='0.0.0.0', port=8000)
+
+if __name__ == '__main__':
+    # Start the Flask server in a separate thread
+    t = Thread(target=run_health_check_server)
+    t.start()
+
+
 
                         
