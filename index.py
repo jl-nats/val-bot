@@ -6,14 +6,14 @@ import config
 import discord
 import asyncio
 from discord.ext import commands
-
+import os
 import embedParser
 
-API_KEY = config.API_KEY
+API_KEY = os.environ['API_KEY']
 
-NAME = config.NAME
+NAME = os.environ['NAME']
 
-TAG = config.TAG
+TAG = os.environ['TAG']
 
 url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
 
@@ -23,7 +23,7 @@ headers = {
 }
 
 # Your bot token
-TOKEN = config.TOKEN
+TOKEN = os.environ['TOKEN']
 
 intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
