@@ -6,14 +6,14 @@ import config
 import discord
 import asyncio
 from discord.ext import commands
-
+import os
 import embedParser
 
-API_KEY = config.API_KEY
+API_KEY = os.environ["API_KEY"]
 
-NAME = config.NAME
+NAME = os.environ["NAME"]
 
-TAG = config.TAG
+TAG = os.environ["TAG"]
 
 url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
 
@@ -23,7 +23,7 @@ headers = {
 }
 
 # Your bot token
-TOKEN = config.TOKEN
+TOKEN = os.environ["TOKEN"]
 
 intents = discord.Intents.default()
 intents.messages = True  # Enable the messages intent
@@ -53,24 +53,23 @@ async def embed(ctx):
     await ctx.send('Disabling embed' if embed else 'Enabling embed')
     embed = not embed
 
-@bot.command(name='setUser')
-async def set_user(ctx, name, tag):
-    await ctx.send(f'Changing tracking to {name}#{tag}...')
+# @bot.command(name='setUser')
+# async def set_user(ctx, name, tag):
+#     await ctx.send(f'Changing tracking to {name}#{tag}...')
     
-    global NAME,TAG, url
+#     global NAME,TAG, url
     
-    res = requests.get(f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{name}/{tag}", headers=headers)
-    response = json.loads(res.text)
+#     res = requests.get(f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{name}/{tag}", headers=headers)
+#     response = json.loads(res.text)
     
-    if not "errors" in response:
-        NAME = name
-        TAG = tag
-        url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
-        
-        await ctx.send(f'Successfully tracking {name}#{tag}')
-        await stop_loop()
-    else:
-        await ctx.send(f'Failed to change tracking to {name}#{tag}')
+#     if not "errors" in response:
+#         NAME = name
+#         TAG = tag
+#         url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
+#         await ctx.send(f'Successfully tracking {name}#{tag}')
+#         await stop_loop()
+#     else:
+#         await ctx.send(f'Failed to change tracking to {name}#{tag}')
 
 async def begin_tracking(channel):
     global started 
@@ -274,6 +273,26 @@ async def stop_loop(ctx):
 #         await ctx.send('Failed')
 
 # Run the bot with the specified token
+
+from flask import Flask
+from threading import Thread
+import discord
+from discord.ext import commands
+
+app = Flask(__name__)
+
+@app.route('/')
+def health_check():
+    return "OK", 200
+
+def run_health_check_server(): 
+    print("Running bogus flask server")
+    app.run(host='0.0.0.0', port=8000)
+
+
+t = Thread(target=run_health_check_server)
+t.start()
+
 bot.run(TOKEN)
 
 
