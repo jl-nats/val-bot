@@ -68,6 +68,8 @@ async def set_user(ctx, name, tag):
         url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/eu/{NAME}/{TAG}"
         
         await ctx.send(f'Successfully tracking {name}#{tag}')
+        await stop_loop()
+        await start_loop()
     else:
         await ctx.send(f'Failed to change tracking to {name}#{tag}')
 
