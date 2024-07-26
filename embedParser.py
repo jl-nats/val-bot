@@ -40,7 +40,7 @@ def generateEmbed(data):
     embed = discord.Embed(
         title=f"Latest Match ",
         # {ita(data['head']['id'])}
-        url="https://youtu.be/vdESRb6zwTE?si=WdZte0PswPYZjgAf&t=26",
+        url=f"https://tracker.gg/valorant/match/{data['head']['id']}",
         color=(COLS[data["match"]["outcome"]]))
     
     outcome_str = ("WIN" if data["match"]["outcome"] else "LOSS")
@@ -48,16 +48,14 @@ def generateEmbed(data):
     mapImage = maps.get(data['match']['map'], "")
     # print(f'Map is invalid? {mapImage == mapDefault}' )
     
-    embed.add_field(name=ita(f"Outcome {outcome_str}"),value=b(f"RRΔ {'+' if data['match']['rr'] > 0 else ''}{data['match']['rr']}"))
+    embed.add_field(name=ita(f"Outcome {outcome_str}"),value=b(f"RRΔ {'+' if data['match']['rr'] > 0 else ''}{data['match']['rr']}\n") + f"Red {data['teams']['red']['score']} - {data['teams']['blue']['score']} Blue")
     # embed.add_field(name="LEADERBOARD",value="AGENT | ACS | K-D-A | RANK",inline=False)
     
     if not mapImage == "":
         embed.set_image(url=mapImage)
-    else:
-        embed.add_field(name=f"Map", value=ita(data['match']['map']))
     
     for team in data["teams"]:
-        embed.add_field(name=f"――――――――――――――――――――――――――――\n### {data['teams'][team]['name']} Team ###",value=b(" "), inline=False)
+        embed.add_field(name=f"――――――――――――――――――――――――――――\n--== {data['teams'][team]['name']} Team ==--",value=b(" "), inline=False)
         for player in data["teams"][team]["players"]:
             # print(player["name"])
             
@@ -71,6 +69,8 @@ def generateEmbed(data):
                                    `{player["stats"]["kills"]}-{player["stats"]["deaths"]}-{player["stats"]["assists"]}` {math.floor(player["stats"]["score"]/data['match']['rounds']):^16}'''))
         embed.add_field(name=' ', value=' ')
     
-    embed.set_footer(text=f"{datetime.strptime(data['head']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y %I:%M%p')} | {data['head']['id']}")
+    
+    embed.add_field(name="", value=ita(f"{data['match']['map']}"))
+    embed.set_footer(text=f"{datetime.strptime(data['head']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y %I:%M%p')} | [{data['head']['id']}]")
         
     return embed 
